@@ -25,15 +25,10 @@ jobs:
             build-essential pkg-config libssl-dev libudev-dev \
             curl ca-certificates gnupg clang llvm make
 
-      - name: Install Solana CLI (apt keyring)
+      - name: Install Solana CLI (GitHub script)
         run: |
-          sudo install -d -m 0755 /usr/share/keyrings
-          curl -fsSL https://apt.solana.com/solana-release.gpg \
-            | sudo gpg --dearmor -o /usr/share/keyrings/solana-archive-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/solana-archive-keyring.gpg arch=amd64] https://apt.solana.com stable main" \
-            | sudo tee /etc/apt/sources.list.d/solana.list > /dev/null
-          sudo apt-get update
-          sudo apt-get install -y solana-cli
+          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
 
       - name: Install Anchor CLI
@@ -43,4 +38,5 @@ jobs:
 
       - name: Build Program
         run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           anchor build
