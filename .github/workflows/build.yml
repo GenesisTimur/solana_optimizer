@@ -8,29 +8,39 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
 
-      - name: Install Solana CLI
+      - name: Install Ubuntu deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -qO - https://apt.solana.com/solana-release.gpg | sudo apt-key add -
-          echo "deb [arch=amd64] https://apt.solana.com stable main" | sudo tee /etc/apt/sources.list.d/solana.list
+          sudo apt-get install -y \
+            build-essential pkg-config libssl-dev libudev-dev \
+            curl ca-certificates gnupg clang llvm make
+
+      - name: Install Solana CLI (apt keyring)
+        run: |
+          sudo install -d -m 0755 /usr/share/keyrings
+          curl -fsSL https://apt.solana.com/solana-release.gpg \
+            | sudo gpg --dearmor -o /usr/share/keyrings/solana-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/solana-archive-keyring.gpg arch=amd64] https://apt.solana.com stable main" \
+            | sudo tee /etc/apt/sources.list.d/solana.list > /dev/null
           sudo apt-get update
           sudo apt-get install -y solana-cli
+          solana --version
 
-      - name: Install Anchor
+      - name: Install Anchor CLI
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-          avm install latest
-          avm use latest
+          cargo install --git https://github.com/coral-xyz/anchor anchor-cli --locked
+          anchor --version
 
       - name: Build Program
         run: |
-          anchor --version
           anchor build
