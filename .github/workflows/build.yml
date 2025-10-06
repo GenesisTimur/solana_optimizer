@@ -1,14 +1,13 @@
 name: Build Anchor Program
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,17 +17,20 @@ jobs:
 
       - name: Install Solana CLI
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
-          solana --version
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg
+          wget -qO - https://apt.solana.com/solana-release.gpg | sudo apt-key add -
+          echo "deb [arch=amd64] https://apt.solana.com stable main" | sudo tee /etc/apt/sources.list.d/solana.list
+          sudo apt-get update
+          sudo apt-get install -y solana-cli
 
       - name: Install Anchor
         run: |
           cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
           avm install latest
           avm use latest
-          anchor --version
 
       - name: Build Program
-        run: anchor build
-
+        run: |
+          anchor --version
+          anchor build
