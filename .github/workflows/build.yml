@@ -23,7 +23,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential pkg-config libssl-dev libudev-dev \
-            curl ca-certificates gnupg clang llvm make
+            curl ca-certificates clang llvm make
 
       - name: Install Solana CLI (via cargo)
         run: |
