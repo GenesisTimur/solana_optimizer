@@ -25,18 +25,18 @@ jobs:
             build-essential pkg-config libssl-dev libudev-dev \
             curl ca-certificates gnupg clang llvm make
 
-      - name: Install Solana CLI (GitHub script)
+      - name: Install Solana CLI (via cargo)
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          cargo install solana-cli --locked
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           solana --version
 
       - name: Install Anchor CLI
         run: |
           cargo install --git https://github.com/coral-xyz/anchor anchor-cli --locked
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           anchor --version
 
       - name: Build Program
         run: |
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           anchor build
