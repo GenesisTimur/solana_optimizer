@@ -1,0 +1,19 @@
+[package]
+name = "secure_counter"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "secure_counter"
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+# Прямой импорт solana-program (Anchor CLI просто вызовет cargo build-sbf)
+solana-program = "1.18"
+
+# Если понадобится, добавишь здесь свои зависимости
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "s"

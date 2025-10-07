@@ -15,28 +15,36 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
 
       - name: Install Ubuntu deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential pkg-config libssl-dev libudev-dev \
-            curl ca-certificates clang llvm make
+          sudo apt-get install -y build-essential pkg-config libssl-dev libudev-dev clang llvm make curl
 
       - name: Install Solana CLI (via cargo)
         run: |
-          cargo install solana-cli --locked
+          cargo install --git https://github.com/solana-labs/solana --tag v1.18.26 solana-cli --locked
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           solana --version
 
       - name: Install Anchor CLI
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor anchor-cli --locked
+          cargo install --git https://github.com/coral-xyz/anchor --tag v0.29.0 anchor-cli --locked
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           anchor --version
 
-      - name: Build Program
+      - name: Anchor Build
         run: |
           anchor build
+          ls -la target/deploy || true
+          ls -la target/idl || true
+
+      - name: Upload artifacts (program .so & IDL)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            target/deploy/*.so
+            target/deploy/*.json
+            target/idl/*.json
+          if-no-files-found: warn
